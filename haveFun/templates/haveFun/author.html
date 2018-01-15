@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{author.name}}</h1>
+<link rel="stylesheet" href="/static/artical_list.css">
+<style type="text/css">
+	.author_time{
+		float: right;
+		line-height: 40px;
+		text-align: right;
+	}
+</style>
+<div >
+	{% for item in articals %}
+	<div id="list">
+		<ul class="note-list">
+			<li id="note-19500486" data-note-id="19500486" class="">
+			  <div class="content">
+
+			    
+			    <a class="title"  href="">{{item.title}}</a>
+			    <p class="abstract">
+			      {{item.content}}
+			    </p>
+			    <div class="meta">
+			        <a class="collection-tag"  href="{% url 'haveFun:tag_detail' item.tag.tag_id %}">{{item.tag.tag_name}}</a>
+			      	<a  >
+			        	<i class="iconfont ic-list-read">阅读：{{item.read}}</i> 
+			        </a>
+			        <a  >
+			          <i class="iconfont ic-list-comments">评论：{{item.command}}</i> 
+			        </a>
+			      	<a><i class="iconfont ic-list-like">收藏：{{item.collect}}</i> </a>
+			      	<span class="time author_time">{{item.pub_time}}</span>
+			    </div>
+			  </div>
+			</li>
+		</ul>
+	</div>
+	{% endfor %}
+</div>
+
+
+{% endblock %}

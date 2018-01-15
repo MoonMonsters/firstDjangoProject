@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript">
+	
+	$(document).ready(function($) {
+		$("#nav-mine").addClass("active");
+		$("#nav-tag").removeClass('active');
+		$("#nav-write").removeClass('active');
+		$("#nav-home").removeClass('active');
+	});
+</script>
+{% endblock %}

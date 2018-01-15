@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>登录</title>
+</head>
+<style type="text/css">
+    body {
+    height: 100%;
+    min-height: 750px;
+    text-align: center;
+    font-size: 14px;
+    background-color: #f1f1f1;
+}
+  .main {
+    width: 400px;
+    margin: 60px auto  ;
+    padding: 30px ;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0,0,0,.1);
+    vertical-align: middle;
+    display: inline-block;
+}
+
+  .title {
+    font-family: -apple-system,SF UI Display,Arial,PingFang SC,Hiragino Sans GB,Microsoft YaHei,WenQuanYi Micro Hei,sans-serif;
+    margin: 0 auto 50px;
+    padding: 10px;
+    font-weight: 400;
+    color: #969696;
+    font-size: 20px;
+}
+.active {
+    font-weight: 700;
+    color: #ea6f5a;
+    border-bottom: 2px solid #ea6f5a;
+}
+    
+  
+.input-prepend input {
+    width: 100%;
+    height: 50px;
+    margin:10px auto;
+    padding: 4px 12px 4px 25px;
+    border: 1px solid #c8c8c8;
+    border-radius: 0 0 4px 4px;
+    background-color: hsla(0,0%,71%,.1);
+    vertical-align: middle;
+   
+    
+}
+.input-prepend{
+    margin-right: 40px; 
+}
+
+.button {
+    width: 100%;
+    padding: 0px 0px;
+    font-size: 18px;
+    border: none;
+    border-radius: 25px;
+    color: #fff;
+    background: #42c02e;
+    cursor: pointer;
+    outline: none;
+    display: block;
+    clear: both;
+    width: 100%;
+    height: 50px;
+    margin: 20px auto;
+    
+}
+a{
+  text-decoration: none;
+  color: #333;
+}
+
+input {
+    -webkit-appearance: textfield;
+    background-color: white;
+    -webkit-rtl-ordering: logical;
+    cursor: auto;
+    border-width: 2px;
+    border-style: inset;
+    border-color: initial;
+    border-image: initial;
+    font-size: 17px;
+    line-height: inherit;
+    text-rendering: auto;
+    color: initial;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+   
+}
+
+  .normal-title a:hover{
+    color: #ea6f5a;
+  }
+
+</style>
+<body>
+    <p><a href="{% url 'haveFun:index' %}" style="color:#ea6f5a;font-size: 33px; ">有趣网</a></p>
+  <div class="main">
+    <h4 class="title">
+      <div class="normal-title">
+        <a class="active" href="{% url 'haveFun:login' %}">登录</a>
+        <b>·</b>
+        <a id="js-sign-up-btn" class="" href="{% url 'haveFun:register' %}">注册</a>
+      </div>
+    </h4>
+    <div class="js-sign-in-container">
+      <form id="new_session" action="{% url 'haveFun:login' %}" accept-charset="UTF-8" method="post">
+         {% csrf_token %}
+          <div class="input-prepend restyle js-normal">
+            <input placeholder="用户名" type="text" name="name" >
+          </div>
+        <div class="input-prepend">
+          <input placeholder="密码" type="password" name="passwd" >
+        </div>
+        <div class="button">
+          <button type="submit" class="btn button">登录</button>
+        </div>
+        <h3 style="color: red;width: 100%; text-align: center;margin-left:20px;">{{ error }}</h3>
+      </form>
+
+    </div>
+</body>
+
+
+
+</html>

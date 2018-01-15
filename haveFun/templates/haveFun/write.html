@@ -1,0 +1,233 @@
+{% extends "base.html" %} {% block content %}
+<script type="text/javascript">
+$(document).ready(function($) {
+    $("#nav-write").addClass("active");
+    $("#nav-tag").removeClass('active');
+    $("#nav-home").removeClass('active');
+    $("#nav-mine").removeClass('active');
+    loadtags();
+});
+$.ajaxSetup({
+    data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+});
+
+</script>
+<link rel="stylesheet" href="/static/write_artical.css">
+<style type="text/css">
+	
+</style>
+
+
+<h1 id = "user_id" style="display: none;">{{user_id}}</h1>
+
+<div class="row-fluid normal-mode active">
+    <div class="span2 aside" style="height: 983px;">
+        <div class="new-notebook"> 
+        	<a href="javascript:void(0)" class="create-notebook win-text">新建文集  </a>
+            <div class="new-notebook-form hide">
+                <form class="create-notebook-form">
+                	{% csrf_token %}
+                    <input placeholder="请输入文集名..." type="text" name="name" class="input-medium notebook-input"> <a href="javascript:void(0)" class="btn cancel" data-action="cancel-create-notebook"> 取消 </a>
+                    <input class="btn btn-mainRed submit" name="commit" type="submit" value="提交" data-action="submit"> </form>
+            </div>
+        </div>
+        <ul class="ul-nav ul-nav-list notebooks ui-sortable" id="notebooklist">
+         <!-- 文集列表 -->
+        </ul>
+            
+    </div>
+    <div class="span3 middle" style="height: 983px;">
+        <div id="notes-list">
+            <div id="new-note"> <a href="javascript:void(0)" data-action="create-note" class="new-note-link"> 新建文章 </a> </div>
+            <ul class="ul-nav ul-nav-list notes ui-sortable">
+                <!-- 文章列表 -->
+            </ul>
+           
+        </div>
+        <div id="move-note-modal" tabindex="-1" aria-hidden="true" class="move-note-modal modal hide fade fullscreen">
+            <div class="modal-header"> <b>移动文章到</b> </div>
+            <div class="modal-body">
+                <ul class="notebooks-select"> </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn cancel-button">取消</button>
+                <input data-action="submit-move-note" class="btn btn-info" name="commit" type="submit" value="提交"> </div>
+        </div>
+    </div>
+    <div class="span7 main" style="height: 983px;">
+	    <form id ="project_file_upload" class="note-form markdown"  method="post" onsubmit="return false;">
+	    	{% csrf_token %}
+	        <input class="title mousetrap" name="note_name" type="text" id="note_title" value="无标题文章">
+	        <ul class="toolbar clearfix">
+	            <li> 
+	            	<a  data-action="redo" data-toggle="tooltip" data-original-title="重做"> 
+	            		重做 
+	            	</a> 
+	            </li>
+	            <li class="pull-right publish-button-item"> 
+	            	<a href="javascript:void(null)" data-action="publicize" id="publish-button"> 
+	            		 发布文章 
+	            	</a>
+	            </li>
+	            <li class="pull-right"> 
+	            	<a  data-action="trigger-save" data-toggle="tooltip" data-original-title="保存"> 
+	            		保存 
+	            	</a> 
+	            </li>
+	        </ul>
+	        <textarea id="content" class="text mousetrap" name="note_content" style="height: 873px;" placeholder="这里开始内容"></textarea>
+	        <div id="kalamu-image-modal" class="modal kalamu-image-modal hide fade" tabindex="-1" aria-hidden="true" data-keyboard="false">
+	            <div class="modal-header">
+	                <h3>插入图片</h3> </div>
+	            <div class="modal-body">
+	                <div class="tab-content">
+	                    <div class="tab-pane clearfix active" id="image-upload">
+	                        <a href="#" class="upload-picture">
+	                            <label for="kalamu-upload-image"><i class="fa picture-o"></i> 点击上传（可多张）</label>
+	                            <input id="kalamu-upload-image" class="btn-upload-link" type="file" name="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" multiple="multiple">点击上传（可多张） </a> <a class="btn-link switch" href="#image-external" data-toggle="tab">或选择网络图片</a>
+	                        <p><a href="http://www.jianshu.com/p/c903745c1322" target="_blank"><i class="fa fa-question-circle"></i> 图片私密性</a></p>
+	                        <button class="btn-link" data-dismiss="modal" aria-hidden="true">取消</button>
+	                    </div>
+	                    <div class="tab-pane clearfix" id="image-external">
+	                        <div class="input-prepend"> <span class="add-on"><i class="fa fa-link"></i></span>
+	                            <input class="span2" id="email" name="email" placeholder="输入网络图片链接" type="text"> </div> <a class="btn-link switch" href="#image-upload" data-toggle="tab">或上传本地图片</a>
+	                        <p><a href="http://www.jianshu.com/p/c903745c1322" target="_blank"><i class="fa fa-question-circle"></i> 图片私密性</a></p>
+	                        <button class="btn-link" name="ok">确认</button>
+	                        <button class="btn-link" data-dismiss="modal" aria-hidden="true">取消</button>
+	                    </div> <span class="message-text" style="display: none">上传中...</span> <img src="//cdn2.jianshu.io/assets/loaders/tiny-5bd8bd9f662a10e0e91bd3edf33132b47d0f9cca77d1707f64495bfd16a44110.gif" class="lodaer loader-tiny" style="display: none"> </div>
+	            </div>
+	        </div>
+        
+    	</form>
+	</div>
+</div>
+<script type="text/javascript" src="/static/write_artical.js"></script>
+<script type="text/javascript">
+	function loadtags()
+     {//文集列表
+         $.ajax({
+             type: "GET",  //提交方式
+             dataType: "text", //数据类型
+             url: "/haveFun/user_taglist/", //请求url
+             data: {
+             },
+             success: function (data) { 
+             	var lists = $.parseJSON(data);
+             	var arr = $.parseJSON(lists['result']);
+             	for (var i=0; i<arr.length; i++)
+             	{
+             		var item = arr[i];
+             		var title = item['fields']['tag_name'];
+             		var li = 'notebookli'+item['pk'];
+             		var a = 'notebook'+item['pk'];
+             		$(".notebooks").append(
+             			'<li class="one-notebook item" li-activestyle='+li+'>'+ 
+	            	'<a  class="notebook-name" id='+a+'>'+title+'</a>'+
+	            	'<a  class="edit-notebook dropdown-toggle" > 编辑 </a>'+
+	                '<ul class="dropdown-menu arrow-top">'+
+	                    '<li> <a  data-action="rename-notebook" > 修改文集名 </a> </li>'+
+	                    '<li> <a  data-action="delete-notebook"> 删除文集 </a> </li>'+
+	                '</ul>'+
+	            '</li>'
+
+             		);
+             		if(i==0)
+             		{
+             			loadArticalByTag(arr[0]['pk']);
+             			$("li[li-activestyle]").each(function(index,item){
+						   $(this).css("background-color","#FF0000");
+						});
+             			
+					}
+					$("li[li-activestyle]").each(function(index,item){
+						   $(this).bind('click', function(event) {
+						  	 $(this).css("background-color","#FF0000").siblings().css("background-color","#3f3f3f"); 
+						   });
+
+
+					});
+             			
+
+             	}
+ 
+                 
+             }
+        });
+     }
+
+     function loadArticalByTag(tag_id)
+     {
+     	
+     	$.ajax({
+             type: "GET",  //提交方式
+             dataType: "text", //数据类型
+             url: '/haveFun/get_articalBy_tag/'+tag_id, //请求url
+             data: {
+             	
+             },
+
+             success: function (data) { 
+             	var lists = $.parseJSON(data);
+             	var arr = $.parseJSON(lists['result']);
+             	for (var i=0; i<arr.length; i++)
+             	{
+             		var item = arr[i];
+             		var title = item['fields']['title'];
+             		var artical_id = item['pk'];
+             		var string = 'notelist'+artical_id;
+             		$(".notes").append(
+             			'<li class="one-note" >'+ 
+                	'<a  class ="note-link title" data-action='+string+ '>'+title+'</a> '+
+                	'<a  class="share-note dropdown-toggle" data-toggle="dropdown">编辑</a>'+
+                    '<ul class="dropdown-menu arrow-top">'+
+                        '<li> <a  class="share-link" data-action="open-share-note"> 直接发布 </a> </li>'+
+                        '<li> <a  data-action="open-move-note">  移动文章 </a> </li>'+
+                        '<li> <a  data-action="trigger-history-mode">  历史版本 </a></li>'+
+                        '<li> <a  data-action="delete-note">  删除文章 </a></li>'+
+                    '</ul>'+
+                '</li>'
+
+             		);
+
+             		$("a[data-action]").each(function(index,item){
+					   if($(this).attr('data-action') == string){
+					   	$(this).bind("click",function(){
+					   		
+					    	loadArticalDetail(artical_id);
+						});
+					   }
+					});
+
+             	}
+ 
+                 
+             }
+        });
+     }
+    function loadArticalDetail(artical_id)
+    {
+
+    	$.ajax({
+             type: "POST",  //提交方式
+             dataType: "text", //数据类型
+             url: '/haveFun/artical_detail/'+artical_id, //请求url
+             data: {
+             },
+             success: function (data) { 
+             	var lists = $.parseJSON(data);
+             	var arr = $.parseJSON(lists['result']);
+             	if(arr.length >0)
+             	{
+             		var item = arr[0];
+             		var title = item['fields']['title'];
+             		var content = item['fields']['content'];
+             		$("#note_title").val(title);
+             		$("#content").text(content)
+             	}
+ 
+                 
+             }
+        });
+    }
+</script>
+{% endblock %}

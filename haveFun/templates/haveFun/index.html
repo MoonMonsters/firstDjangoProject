@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/artical_list.css">
+<script type="text/javascript">
+	
+	$(document).ready(function($) {
+		$("#nav-home").addClass("active");
+		$("#nav-tag").removeClass('active');
+		$("#nav-write").removeClass('active');
+		$("#nav-mine").removeClass('active');
+		
+	});
+</script>
+<div >
+	{% for item in articals %}
+	<div id="list">
+		<ul class="note-list">
+			<li id="note-19500486" data-note-id="19500486" class="">
+			  <div class="content">
+			    <div class="author">
+			      <a class="avatar" >   
+				     <div class="info">
+				        <a class="nickname"  href="{% url 'haveFun:author' item.owner.name %}">{{item.owner.name}}</a>
+				        <span class="time">{{item.pub_time}}</span>
+				      </div>
+				  </a>
+			    </div>
+			    <a class="title"  href="{% url 'haveFun:artical_detail' item.article_id %}">{{item.title}}</a>
+			    <p class="abstract">
+			      {{item.content}}
+			    </p>
+			    <div class="meta">
+			        <a class="collection-tag"  href="{% url 'haveFun:tag_detail' item.tag.tag_id %}">{{item.tag.tag_name}}</a>
+			      	<a  href="{% url 'haveFun:artical_detail' item.article_id %}">
+			        	<i class="iconfont ic-list-read">阅读：{{item.read}}</i> 
+			        </a>
+			        <a  href="{% url 'haveFun:artical_detail' item.article_id %}">
+			          <i class="iconfont ic-list-comments">评论：{{item.command}}</i> 
+			        </a>
+			      	<a href="{% url 'haveFun:artical_detail' item.article_id %}"><i class="iconfont ic-list-like">收藏：{{item.collect}}</i> </a>
+			    </div>
+			  </div>
+			</li>
+		</ul>
+	</div>
+	{% endfor %}
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,66 @@
+
+	#list{
+		margin-top: 10px;
+		background-color: #f9f9f9; 
+        padding: 10px 10px;
+
+	}
+	.note-list li {
+	    position: relative;
+	    width: 100%;
+	    margin: 0 0 17px;
+	    padding: 0 2px 17px 0;
+	    border-bottom: 1px solid #f0f0f0;
+	    word-wrap: break-word;
+	    line-height: 20px;
+	    display: list-item;
+    	text-align: -webkit-match-parent;
+	}
+	.note-list {
+	    margin: 0;
+	    padding: 0;
+	    list-style: none;
+	}
+	
+	.info{line-height: 35px;margin: 8px 0;}
+	.nickname{font-size: 20px;color: #666;}
+	.time{font-size: 15px;color: #788;margin: 0 10px;}
+	.title{font-size: 22px;color: #333;line-height: 40px;}
+	.abstract{font-size: 17px;color: #444; }
+	.collection-tag{
+		display: inline-block;
+	    padding: 3px 6px;
+	    margin-top: -1px;
+	    max-width: 200px;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	    white-space: nowrap;
+	    line-height: 1;
+	    vertical-align: middle;
+	    color: #ea6f5a!important;
+	    border: 1px solid rgba(236,97,73,.7);
+	    border-radius: 3px;
+	}
+	.meta {
+	    padding-right: 0!important;
+	    font-size: 12px;
+	    font-weight: 400;
+	    line-height: 20px;
+
+	}
+	.iconfont {
+	    font-family: iconfont!important;
+	    font-size: inherit;
+	    font-style: normal;
+	    font-weight: 400!important;
+	    -webkit-font-smoothing: antialiased;
+	    -moz-osx-font-smoothing: grayscale;
+	    margin:0 4px;
+	}
+
+	a {
+	    cursor: pointer;
+	    color: #333;
+    	text-decoration: none;
+	}
+	a:hover{color: #111;text-decoration: underline;}

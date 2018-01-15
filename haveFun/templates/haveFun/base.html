@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="renderer" content="webkit">
+	<title>有趣网</title>
+	<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<style type="text/css">
+	html,body{
+		margin: 0;
+		padding: 0;
+	}
+	p{
+		margin: 10px 0;
+	}
+	.padding_set{
+		margin: 0 10px;
+	}
+	.content{
+		padding: 0px 40px;
+	}
+	.font18{
+		font-size: 18px;
+	}
+	
+</style>
+
+<body>
+	<nav class="navbar navbar-default font18">
+		<ul class="nav navbar-nav">
+	        <li id="nav-home" ><a id="home" href="{% url 'haveFun:index' %}">首页</a></li>
+	        <li id="nav-tag"><a href="{% url 'haveFun:web_taglist' %}">会馆</a></li>
+	        <li id="nav-write"><a href="{% url 'haveFun:pup_artical'%}">发表文章</a></li>
+	        <li id="nav-meiHome"><a href="{% url 'haveFun:meiHome'%}">仿美团首页</a></li>
+	        <li id="nav-MeiNeibor"><a href="{% url 'haveFun:meiNeibor'%}">美团附近</a></li>
+	        
+        </ul>
+		<ul class="nav navbar-nav navbar-right padding_set">
+			<li id="nav-mine"><a href="{% url 'haveFun:mine' %}">我的</a></li>
+	        <li><a href="{% url 'haveFun:login' %}">登录</a></li>
+	        <li><a href="{% url 'haveFun:register' %}">注册</a></li>
+       </ul>	
+	</nav>
+	<div class='content'>
+		{% block content %}
+        {% endblock %}
+	</div>
+</body>
+</html>
