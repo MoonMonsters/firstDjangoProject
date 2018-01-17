@@ -44,7 +44,13 @@ def api_paging(objs, request, Ser):
     print(type(objs))
     paginator=Paginator(objs,page_size,3) # paginator对象
     total = paginator.num_pages #总页数
-    print(total)
+    if(total<page):
+      return JSONResponse({
+        'result': [],
+        'total': total,
+        'page':page,
+        'desc':'page success'
+    }, status=HTTP_200_OK) #返回
     try:
         p = paginator.page(page)
     except PageNotAnInteger:
