@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^', include(router.urls)),
 
     url(r'^articals$', views.Artical_list_api),#文章列表
+    url(r'^articalTags$', views.Artical_Tag_List_api),#文集列表
 
     url(r'^register$', views.UserRegisterAPIView.as_view()),
     url(r'^login$', views.UserLoginAPIView.as_view()),

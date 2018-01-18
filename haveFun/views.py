@@ -184,16 +184,12 @@ def Artical_list_api(request):
       # return JSONResponse(dic,status=HTTP_200_OK)
     
 
-# class ArticalListAPIView(APIView):
-#     queryset = models.Artical.objects.all()
-#     serializer_class = serializers.ArticalSerializer
-#     permission_classes = (permissions.AllowAny,)
-#     def post(self, request, format=None):
-#         # print(request)
-#         datas = models.Artical.objects.all()
-#         s = serializers.ArticalSerializer(datas,many=True)#many=True 数组才能序列化
-#         print(type(s.data),s.data)
-#         dic = {'result':s.data,'message':'获取成功'}
-#         return JSONResponse(dic, status=HTTP_200_OK)
-
+# 用户获取文集列表
+@csrf_exempt
+def Artical_Tag_List_api(request):
+  if request.method == 'POST':
+    arr = models.ArticalTag.objects.all().order_by('tag_id')
+    data=serializers.ArticalTagSerializer(arr,many=True)
+    dic = {'result':data.data,'desc':'获取成功'}
+    return JSONResponse(dic, status=HTTP_200_OK)
 	
