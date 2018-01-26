@@ -25,7 +25,7 @@ SECRET_KEY = '7lig1(*^#1yz9%=7x0_ylyy24*f9-c8)u_#(q=(s+3_*qj-#-)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -77,15 +77,19 @@ WSGI_APPLICATION = 'myApplication.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #     'NAME':'funDB',
+    #     'USER':'root',
+    #     'PASSWORD':'root',
+    #     'HOST':'localhost',
+    #     'PORT':'8889',
+    #     "OPTIONS" : {'init_command':"SET sql_mode='NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'"},
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'NAME':'funDB',
-        'USER':'root',
-        'PASSWORD':'root',
-        'HOST':'localhost',
-        'PORT':'8889',
-        "OPTIONS" : {'init_command':"SET sql_mode='NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'"},
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -128,7 +132,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/' 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
+MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
+MEDIA_URL = '/media/'
 
 # AllowAny # 无限制
 # IsAuthenticated # 登陆用户
@@ -141,6 +146,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 REST_FRAMEWORK = {
         'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'PAGINATE_BY': 10
+        'PAGINATE_BY': 10,
+        'DEFAULT_PARSER_CLASSES': (
+            'rest_framework.parsers.JSONParser',
+            'rest_framework.parsers.FormParser',
+            'rest_framework.parsers.MultiPartParser',
+            'rest_framework.parsers.FileUploadParser'
+            ),
     }
 

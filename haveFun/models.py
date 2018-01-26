@@ -1,10 +1,6 @@
 from django.db import models
 import json
 
-# class ArticalManager(models.Manager):
-#     def create_artical(self,title,content):
-#         artical =self.create(title = title,content = content)
-#         return artical	
 
 
 class haveFunUser(models.Model):
@@ -23,6 +19,14 @@ class haveFunUser(models.Model):
 	passwd = models.CharField(max_length=64)
 	def __str__(self):
 		return self.name,self.phone
+
+class userHeadImage(models.Model):
+    image_id = models.AutoField(primary_key=True)
+    image = models.ImageField(max_length=None,upload_to='head_images',null=True, blank=True)
+    # owner = models.ForeignKey(
+    #     haveFunUser,
+    # )
+
 
 class ArticalTag(models.Model):
     tag_id = models.AutoField(primary_key = True)

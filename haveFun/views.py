@@ -11,15 +11,18 @@ from rest_framework  import viewsets
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
+from rest_framework.parsers import *
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
-
+from rest_framework.generics import CreateAPIView
 from haveFun.permissions import IsOwnerOrReadOnly
 
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+import pymysql
 
 
 class JSONResponse(HttpResponse):
@@ -29,10 +32,30 @@ class JSONResponse(HttpResponse):
 		super(JSONResponse, self).__init__(content, **kwargs)
 
 
-        
-        
-    
 
+#链接数据库
+def connectdb():
+  db=pymysql.connect(host='localhost',user='root',passwd='root',db='funDB',port=8889,charset='utf-8')
+  db.autocommit(True)
+  cursor=db.cursor()
+  return (db,cursor)
+#关闭数据库
+def closedb(db,cursor):
+    db.close()
+    cursor.close()      
+
+class UploadViewSet(CreateAPIView):
+    model = models.userHeadImage.objects.all()
+    serializer_class = serializers.ImageSerializer
+    parser_classes = (MultiPartParser,)
+
+def image_list(request):
+    if request.method == 'GET':
+        ImageObjects = models.userHeadImage.objects.all()
+        serializer = serializers.ImageSerializer(ImageObjects, many=True)
+        return JSONResponse({'result':serializer.data,'desc':'success'}, status=HTTP_200_OK)       
+    
+#分页
 def api_paging(objs, request, Ser):
     """
     objs : 实体对象
@@ -71,7 +94,7 @@ def api_paging(objs, request, Ser):
 
 class UserLoginAPIView(APIView):
    queryset = models.haveFunUser.objects.all()
-   serializer_class = serializers.UserLoginSerializer
+   serializer_class = serializers.UserInforSerializer
    permission_classes = (permissions.AllowAny,)
 
    def post(self, request, format=None):
@@ -79,33 +102,36 @@ class UserLoginAPIView(APIView):
        username = data.get('name')
        password = data.get('passwd')
        if not models.haveFunUser.objects.filter(name__exact=username):
-           return JSONResponse({'desc':'用户名不存在'},status=HTTP_400_BAD_REQUEST,)
+           return JSONResponse({'desc':'用户名不存在'},status=HTTP_200_OK,)
        user = models.haveFunUser.objects.get(name__exact=username)
        if user.passwd == password:
-           serializer = serializers.UserSerializer(user)
+           serializer = serializers.UserInforSerializer(user)
            new_data = serializer.data
            print(new_data)
            # 记忆已登录用户
            self.request.session['user_id'] = user.user_id
            self.request.session['user_name'] = user.name
            return JSONResponse({'result':serializer.data,'desc':'登陆成功'}, status=HTTP_200_OK)
-       dic['desc'] = 'password error'
-       return JSONResponse( dic,status=HTTP_400_BAD_REQUEST)
+       return JSONResponse( {'desc':'password error'},status=HTTP_200_OK)
 
 #用于注册
 
 class UserRegisterAPIView(APIView):
    queryset = models.haveFunUser.objects.all()
-   serializer_class = serializers.UserRegisterSerializer
+   serializer_class = serializers.UserInforSerializer
    permission_classes = (permissions.AllowAny,)
 
    def post(self, request, format=None):
        data = request.data
        username = data.get('name')
+       phone = data.get('phone')
+       print('registrt--->',data)
        dic = {}
        if models.haveFunUser.objects.filter(name__exact=username):
-           return JSONResponse({'desc':用户名已存在},status=HTTP_400_BAD_REQUEST)
-       serializer = serializers.UserRegisterSerializer(data=data)
+           return JSONResponse({'desc':'用户名已存在'},status=HTTP_400_BAD_REQUEST)
+       if models.haveFunUser.objects.filter(phone__exact=phone):
+           return JSONResponse({'desc':'手机号码已存在'},status=HTTP_400_BAD_REQUEST)
+       serializer = serializers.UserSerializer(data=data)
        if serializer.is_valid(raise_exception=True):
            serializer.save()
            dic['result'] = serializer.data
@@ -134,7 +160,7 @@ class ArticalViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
    queryset = models.haveFunUser.objects.all()
-   serializer_class = serializers.UserSerializer
+   serializer_class = serializers.UserInforSerializer
 
 #用于保存文章草稿
 @csrf_exempt
@@ -178,10 +204,6 @@ def Artical_list_api(request):
   if request.method == 'POST':
     arr = models.Artical.objects.all().order_by('article_id') #order_by必须有 不然分页失败
     return api_paging(arr, request, serializers.ArticalSerializer) #分页处理
-
-    # except:
-      # dic = {'message':'no more data','result':[]}
-      # return JSONResponse(dic,status=HTTP_200_OK)
     
 
 # 用户获取文集列表

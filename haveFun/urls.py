@@ -6,12 +6,13 @@ from rest_framework import routers
 
 
 router = routers.DefaultRouter()
-# router.register(r'users',views.UserViewSet)
+
 # router.register(r'articals',views.ArticalViewSet)
-# router.register(r'taglist',views.ArticalTagViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^upload_head_image$', views.UploadViewSet.as_view()),
+    url(r'^image_list$', views.image_list),
 
     url(r'^articals$', views.Artical_list_api),#文章列表
     url(r'^articalTags$', views.Artical_Tag_List_api),#文集列表
