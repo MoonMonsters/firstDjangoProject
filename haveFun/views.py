@@ -16,13 +16,27 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
 from haveFun.permissions import IsOwnerOrReadOnly
-
+from PIL import Image
+from io import StringIO
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-
+from rest_framework import generics
 import pymysql
+
+from rest_framework import mixins
+
+import os
+
+def delete_image_file(file_path):
+    '''
+    删除文件
+    '''
+    file_full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+    if os.path.exists(file_full_path):
+        if os.path.isfile(file_full_path):
+            #return file_full_path
+            os.remove(file_full_path)
 
 
 class JSONResponse(HttpResponse):
@@ -33,35 +47,34 @@ class JSONResponse(HttpResponse):
 
 
 
-#链接数据库
-def connectdb():
-  db=pymysql.connect(host='localhost',user='root',passwd='root',db='funDB',port=8889,charset='utf-8')
-  db.autocommit(True)
-  cursor=db.cursor()
-  return (db,cursor)
-#关闭数据库
-def closedb(db,cursor):
-    db.close()
-    cursor.close()      
-
-class UploadViewSet(CreateAPIView):
-    model = models.userHeadImage.objects.all()
+class imageAPI(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    queryset = models.userHeadImage.objects.all()
     serializer_class = serializers.ImageSerializer
-    parser_classes = (MultiPartParser,)
 
-def image_list(request):
-    if request.method == 'GET':
-        ImageObjects = models.userHeadImage.objects.all()
-        serializer = serializers.ImageSerializer(ImageObjects, many=True)
-        return JSONResponse({'result':serializer.data,'desc':'success'}, status=HTTP_200_OK)       
+    def post(self, request, *args, **kwargs):
+        data = request.data.dict()
+        user_id = data['user_id']
+        m = models.userHeadImage.objects.filter(uploaded_by_id__exact=user_id)
+        for model in m:
+            model.image.delete()
+            print(model.image)
+            model.delete()
+        try:
+            self.create(request, *args, **kwargs)
+            image = models.userHeadImage.objects.get(uploaded_by_id__exact=user_id)
+            return JSONResponse({'result':serializers.ImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)
+        except:
+            return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
+
+class UploadViewSet(imageAPI):
+    queryset = models.userHeadImage.objects.all()
+    serializer_class = serializers.ImageSerializer
+    parser_classes = (MultiPartParser, )    
     
 #分页
 def api_paging(objs, request, Ser):
-    """
-    objs : 实体对象
-    request : 请求对象
-    Serializer : 对应实体对象的序列化
-    """
     page_size = int(request.POST.get('page_size'))
     page = int(request.POST.get('page'))
     print(type(objs))
@@ -73,7 +86,7 @@ def api_paging(objs, request, Ser):
         'total': total,
         'page':page,
         'desc':'page success'
-    }, status=HTTP_200_OK) #返回
+    }, status=HTTP_200_OK)
     try:
         p = paginator.page(page)
     except PageNotAnInteger:

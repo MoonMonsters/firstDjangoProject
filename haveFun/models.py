@@ -23,9 +23,8 @@ class haveFunUser(models.Model):
 class userHeadImage(models.Model):
     image_id = models.AutoField(primary_key=True)
     image = models.ImageField(max_length=None,upload_to='head_images',null=True, blank=True)
-    # owner = models.ForeignKey(
-    #     haveFunUser,
-    # )
+    uploaded_by = models.ForeignKey(haveFunUser,unique = True)
+    
 
 
 class ArticalTag(models.Model):
