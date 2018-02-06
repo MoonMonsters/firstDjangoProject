@@ -125,7 +125,7 @@ class UserLoginAPIView(APIView):
            self.request.session['user_id'] = user.user_id
            self.request.session['user_name'] = user.name
            return JSONResponse({'result':serializer.data,'desc':'登陆成功'}, status=HTTP_200_OK)
-       return JSONResponse( {'desc':'password error'},status=HTTP_200_OK)
+       return JSONResponse( {'desc':'password error'},status=HTTP_400_BAD_REQUEST)
 
 #用于注册
 
@@ -227,4 +227,35 @@ def Artical_Tag_List_api(request):
     data=serializers.ArticalTagSerializer(arr,many=True)
     dic = {'result':data.data,'desc':'获取成功'}
     return JSONResponse(dic, status=HTTP_200_OK)
-	
+
+class UserChnageAPIView(APIView):
+   queryset = models.haveFunUser.objects.all()
+   serializer_class = serializers.UserInforSerializer
+   permission_classes = (permissions.AllowAny,)
+# 修改用户信息
+   def post(self, request, format=None):
+      print('xxxxxchange_user_info')
+      if request.method == 'POST':	
+          user_id = request.POST.get('user_id')
+          sex =request.POST.get('sex')
+          email = request.POST.get('email')
+          address = request.POST.get('address')
+          user = models.haveFunUser.objects.filter(user_id__exact=user_id)
+          print('change_user_info======')
+          if user:
+              if sex:
+                user.update(sex=sex)
+              if email:
+                user.update(email=email)
+              if address:
+                user.update(address=address)
+              user = user.first()
+              serializer = serializers.UserInforSerializer(user)
+              return JSONResponse({'result':serializer.data,'desc':'修改成功'}, status=HTTP_200_OK)
+          else:
+            return JSONResponse( {'desc':'没有此用户'},status=HTTP_400_BAD_REQUEST)
+
+            
+
+
+

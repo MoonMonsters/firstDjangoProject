@@ -23,7 +23,7 @@ class haveFunUser(models.Model):
 class userHeadImage(models.Model):
     image_id = models.AutoField(primary_key=True)
     image = models.ImageField(max_length=None,upload_to='head_images',null=True, blank=True)
-    uploaded_by = models.ForeignKey(haveFunUser,unique = True)
+    uploaded_by = models.ForeignKey(haveFunUser)
     
 
 

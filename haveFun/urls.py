@@ -12,7 +12,7 @@ router = routers.DefaultRouter()
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^upload_head_image$', views.UploadViewSet.as_view()),
-
+    url(r'^change_user_infor$', views.UserChnageAPIView.as_view()),#修改用户信息
 
     url(r'^articals$', views.Artical_list_api),#文章列表
     url(r'^articalTags$', views.Artical_Tag_List_api),#文集列表
