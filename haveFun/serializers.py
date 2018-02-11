@@ -13,12 +13,24 @@ class ImageSerializer(serializers.ModelSerializer):
         data = self.context.get('request').data.dict()
         user_id = data['user_id']       
         print('xxxx=------',user_id,'xasaaaaa=---',validated_data)
-        validated_data.update({'uploaded_by_id': user_id})
+        validated_data.update({'uploaded_by': user_id})
         return models.userHeadImage.objects.create(**validated_data)
     class Meta:
         model = models.userHeadImage
         fields = ('image_id','image')
 
+class ArticalImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(max_length=None, use_url=True)#use_url=True是否显示完整的路径
+    def create(self, validated_data):
+        data = self.context.get('request').data.dict()
+        article_id = data['article_id']       
+        print('article_id=------',article_id,'xasaaaaa=---',validated_data)
+        validated_data.update({'uploaded_artical_id': article_id})
+        validated_data.update({'filename': data['filename']})
+        return models.articalHeadImage.objects.create(**validated_data)
+    class Meta:
+        model = models.userHeadImage
+        fields = ('filename','image','uploaded_artical_id')
 
 
 #用户基本信息
@@ -29,7 +41,9 @@ class UserSerializer(serializers.ModelSerializer):
         t = obj.date_joined
         return t.strftime('%Y-%m-%d %X')
     def get_img(self,obj):
-        image = ImageSerializer(models.userHeadImage.objects.filter(uploaded_by_id__exact=obj.user_id).first()).data
+        if not models.userHeadImage.objects.filter(uploaded_by__exact=obj.user_id):
+            return ''
+        image = ImageSerializer(models.userHeadImage.objects.filter(uploaded_by__exact=obj.user_id).first()).data
         if image:
             return image['image']
         else:
@@ -47,7 +61,7 @@ class UserInforSerializer(serializers.ModelSerializer):
     time_join = serializers.SerializerMethodField()
     img = serializers.SerializerMethodField()
     def get_img(self,obj):
-        image = ImageSerializer(models.userHeadImage.objects.filter(uploaded_by_id__exact=obj.user_id).first()).data
+        image = ImageSerializer(models.userHeadImage.objects.filter(uploaded_by__exact=obj.user_id).first()).data
         print(image)
         if image:
             return image['image']
@@ -67,12 +81,15 @@ class UserInforSerializer(serializers.ModelSerializer):
 class ArticalTagSerializer(serializers.ModelSerializer):
     createdByUser = UserInforSerializer(many=False)
     create_Time = serializers.SerializerMethodField()
+    article_count = serializers.SerializerMethodField()
     def get_create_Time(self,obj):
         t = obj.createTime
         return t.strftime('%Y-%m-%d %X')
+    def get_article_count(self, obj):
+        return models.Artical.objects.filter(tag_id__exact=obj.tag_id).count()
     class Meta:
         model = models.ArticalTag
-        fields = ('tag_id','tag_name','createdByUser','create_Time','tag_abstract','tag_img')
+        fields = ('tag_id','tag_name','createdByUser','create_Time','tag_abstract','tag_img','article_count')
 
 class ArticalSerializer(serializers.ModelSerializer):
     owner = UserInforSerializer(many=False) 

@@ -13,6 +13,9 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^upload_head_image$', views.UploadViewSet.as_view()),
     url(r'^change_user_infor$', views.UserChnageAPIView.as_view()),#修改用户信息
+    url(r'^artical_upload$', views.Artical_upload_api),
+    url(r'^upload_artical_image$', views.UploadArticalImageSet.as_view()),
+    url(r'^artical_tags$', views.tag_list_api),#APP文集列表
 
     url(r'^articals$', views.Artical_list_api),#文章列表
     url(r'^articalTags$', views.Artical_Tag_List_api),#文集列表

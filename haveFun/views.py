@@ -56,23 +56,50 @@ class imageAPI(mixins.ListModelMixin,
     def post(self, request, *args, **kwargs):
         data = request.data.dict()
         user_id = data['user_id']
-        m = models.userHeadImage.objects.filter(uploaded_by_id__exact=user_id)
+        m = models.userHeadImage.objects.filter(uploaded_by__exact=user_id)
         for model in m:
             model.image.delete()
             print(model.image)
             model.delete()
         try:
             self.create(request, *args, **kwargs)
-            image = models.userHeadImage.objects.get(uploaded_by_id__exact=user_id)
+            image = models.userHeadImage.objects.get(uploaded_by__exact=user_id)
             return JSONResponse({'result':serializers.ImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)
         except:
             return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
 
+class articalImageAPI(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    # queryset = models.userHeadImage.objects.all()
+    # serializer_class = serializers.ImageSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.dict()
+        filename = data['filename']
+        m = models.articalHeadImage.objects.filter(filename__exact=filename)
+        for model in m:
+            model.image.delete()
+            print(model.image)
+            model.delete()
+        try:
+            return self.create(request, *args, **kwargs)
+            image = models.articalHeadImage.objects.get(filename__exact=filename)
+            return JSONResponse({'result':serializers.ImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)
+        except:
+            return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
+
+class UploadArticalImageSet(articalImageAPI):
+    queryset = models.articalHeadImage.objects.all()
+    serializer_class = serializers.ArticalImageSerializer
+    parser_classes = (MultiPartParser, )    
+
+
 class UploadViewSet(imageAPI):
     queryset = models.userHeadImage.objects.all()
     serializer_class = serializers.ImageSerializer
-    parser_classes = (MultiPartParser, )    
-    
+    parser_classes = (MultiPartParser, )
+
 #分页
 def api_paging(objs, request, Ser):
     page_size = int(request.POST.get('page_size'))
@@ -255,7 +282,31 @@ class UserChnageAPIView(APIView):
           else:
             return JSONResponse( {'desc':'没有此用户'},status=HTTP_400_BAD_REQUEST)
 
-            
-
-
-
+#上传文章
+@csrf_exempt
+def Artical_upload_api(request):
+  if request.method == 'POST':
+      title =request.POST.get('title')
+      content = request.POST.get('content')
+      user_id = request.POST.get('user_id')
+      tag_id = request.POST.get('tag_id')
+      if not user_id:
+          return JSONResponse( {'desc':'请先登录'},status=HTTP_400_BAD_REQUEST)
+      if not title:
+          return JSONResponse( {'desc':'请先填写文章标题'},status=HTTP_400_BAD_REQUEST)
+      if not tag_id:
+          return JSONResponse( {'desc':'请选择文集'},status=HTTP_400_BAD_REQUEST)
+      dic = {'title':title,'content':content,'tag_id':tag_id,'owner_id':user_id}
+      models.Artical.objects.create(**dic)
+      return JSONResponse({'desc':'保存成功'}, status=HTTP_200_OK)         
+#APP获取用户文集
+@csrf_exempt
+def tag_list_api(request):
+  if request.method == 'POST':  
+       user_id = request.POST.get('user_id')
+       if user_id:
+           tag = models.ArticalTag.objects.filter(createdByUser_id__exact=user_id)
+           data=serializers.ArticalTagSerializer(tag,many=True)
+           dic = {'result':data.data,'desc':'获取成功'}
+           return JSONResponse(dic, status=HTTP_200_OK)
+       return JSONResponse({'desc':'请先登录'}, status=HTTP_400_BAD_REQUEST)
