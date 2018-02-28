@@ -1,5 +1,7 @@
+#encoding:utf-8
 from django.db import models
 import json
+import time
 
 
 
@@ -29,10 +31,15 @@ class userHeadImage(models.Model):
 class articalHeadImage(models.Model):
     image_id = models.AutoField(primary_key=True,default=1)
     image = models.ImageField(max_length=None,upload_to='artical_image')
-    uploaded_artical_id = models.IntegerField(unique=False)
+    uploaded_by = models.IntegerField(unique=False)
     filename = models.CharField(max_length=100,default = '')
-
-
+    
+class ArticalTagImage(models.Model):
+    image_id = models.AutoField(primary_key=True,default=1)
+    image = models.ImageField(max_length=None,upload_to='ArticalTag')
+    uploaded_by = models.IntegerField(unique=True)
+    filename = models.CharField(max_length=100,default = '')
+    
 class ArticalTag(models.Model):
     tag_id = models.AutoField(primary_key = True,default=1)
     tag_name = models.CharField(max_length=64)
@@ -46,7 +53,12 @@ class ArticalTag(models.Model):
         ordering = ['createTime']
         unique_together = (('tag_id','tag_name','createdByUser','createTime','tag_abstract','tag_img'),)
   
-
+class ArticalManager(models.Manager):
+    def create(self, *args, **kwargs):
+        # kwargs['content'] = '---------'
+        # kwargs['pub_time'] = time.strftime('%Y-%m-%d %X',time.localtime(time.time()))
+        print('manager-artcal----create--',kwargs)
+        super(ArticalManager, self).create(*args, **kwargs)  
 class Artical(models.Model):
     article_id = models.AutoField(primary_key=True,default=1)
     title = models.CharField(max_length=60)
@@ -58,8 +70,17 @@ class Artical(models.Model):
     command = models.PositiveIntegerField(default=0)
     owner = models.ForeignKey("haveFunUser")
     image = models.TextField(null=True,blank = True)
+    objects = ArticalManager()
     def __str__(self):
         return self.title,self.owner.name
+    # def save(self, *args, **kwargs):
+    #     print('artical-saving--')
+    #     self.pub_time = datetime.datetime.now()
+    #     print(kwargs,args)
+        # self.read = 0
+        # self.collect = 0
+        # self.command = 0
+        # super(Artical, self).save(*args, **kwargs)
 
     
 class ArticalDraft(models.Model):

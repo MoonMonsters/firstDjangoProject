@@ -55,48 +55,73 @@ class imageAPI(mixins.ListModelMixin,
 
     def post(self, request, *args, **kwargs):
         data = request.data.dict()
-        user_id = data['user_id']
-        m = models.userHeadImage.objects.filter(uploaded_by__exact=user_id)
+        user_id = data['uploaded_by']
+        m = models.userHeadImage.objects.select_related().filter(uploaded_by__exact=user_id)
         for model in m:
             model.image.delete()
             print(model.image)
             model.delete()
         try:
             self.create(request, *args, **kwargs)
-            image = models.userHeadImage.objects.get(uploaded_by__exact=user_id)
+            image = models.userHeadImage.objects.select_related().get(uploaded_by__exact=user_id)
             return JSONResponse({'result':serializers.ImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)
         except:
             return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
 
-class articalImageAPI(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
-                  generics.GenericAPIView):
-    # queryset = models.userHeadImage.objects.all()
-    # serializer_class = serializers.ImageSerializer
-
+#上传文集照片   
+class UploadArticalTagImageSet(APIView):
+    queryset = models.ArticalTagImage.objects.select_related().all()
+    serializer_class = serializers.ArticalImageSerializer
+    parser_classes = (MultiPartParser, )
     def post(self, request, *args, **kwargs):
         data = request.data.dict()
         filename = data['filename']
-        m = models.articalHeadImage.objects.filter(filename__exact=filename)
-        for model in m:
-            model.image.delete()
-            print(model.image)
-            model.delete()
-        try:
-            return self.create(request, *args, **kwargs)
-            image = models.articalHeadImage.objects.get(filename__exact=filename)
-            return JSONResponse({'result':serializers.ImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)
-        except:
-            return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
-
-class UploadArticalImageSet(articalImageAPI):
-    queryset = models.articalHeadImage.objects.all()
+        user_id = data['uploaded_by']
+        print('artical--tag--image----',data)
+        if models.haveFunUser.objects.select_related().filter(user_id=user_id):
+            m = models.ArticalTagImage.objects.select_related().filter(filename=filename)
+            for model in m:
+                model.image.delete()
+                print(model.image)
+                model.delete()
+            try:
+                print('-----creta--')
+                models.ArticalTagImage.objects.create(**data)
+                image = models.ArticalTagImage.objects.select_related().get(filename=filename)
+                return JSONResponse({'result':serializers.ArticalImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)                
+            except:
+                return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
+ 
+        return JSONResponse({'desc':'用户不存在'},status=HTTP_400_BAD_REQUEST)
+#上传文章照片   
+class UploadArticalImageSet(APIView):
+    queryset = models.articalHeadImage.objects.select_related().all()
     serializer_class = serializers.ArticalImageSerializer
-    parser_classes = (MultiPartParser, )    
+    parser_classes = (MultiPartParser, )
+    def post(self, request, *args, **kwargs):
+        data = request.data.dict()
+        filename = data['filename']
+        user_id = data['uploaded_by']
+        print('articalimage----',data)
+        if models.haveFunUser.objects.select_related().filter(user_id__exact=user_id):
+            m = models.articalHeadImage.objects.select_related().filter(filename__exact=filename)
+            for model in m:
+                model.image.delete()
+                print(model.image)
+                model.delete()
+            try:
+                return models.articalHeadImage.objects.create(**data)
+                # image = models.articalHeadImage.objects.select_related().get(filename=filename)
+                # return JSONResponse({'result':serializers.ArticalImageSerializer(image).data,'desc':'upload success'}, status=HTTP_200_OK)                
+            except:
+                return JSONResponse({'desc':'upload faile'},status=HTTP_400_BAD_REQUEST)
+ 
+        return JSONResponse({'desc':'用户不存在'},status=HTTP_400_BAD_REQUEST)
+         
 
 
 class UploadViewSet(imageAPI):
-    queryset = models.userHeadImage.objects.all()
+    queryset = models.userHeadImage.objects.select_related().all()
     serializer_class = serializers.ImageSerializer
     parser_classes = (MultiPartParser, )
 
@@ -133,7 +158,7 @@ def api_paging(objs, request, Ser):
 #用于登录
 
 class UserLoginAPIView(APIView):
-   queryset = models.haveFunUser.objects.all()
+   queryset = models.haveFunUser.objects.select_related().all()
    serializer_class = serializers.UserInforSerializer
    permission_classes = (permissions.AllowAny,)
 
@@ -141,9 +166,9 @@ class UserLoginAPIView(APIView):
        data = request.data
        username = data.get('name')
        password = data.get('passwd')
-       if not models.haveFunUser.objects.filter(name__exact=username):
+       if not models.haveFunUser.objects.select_related().filter(name__exact=username):
            return JSONResponse({'desc':'用户名不存在'},status=HTTP_200_OK,)
-       user = models.haveFunUser.objects.get(name__exact=username)
+       user = models.haveFunUser.objects.select_related().get(name__exact=username)
        if user.passwd == password:
            serializer = serializers.UserInforSerializer(user)
            new_data = serializer.data
@@ -157,7 +182,7 @@ class UserLoginAPIView(APIView):
 #用于注册
 
 class UserRegisterAPIView(APIView):
-   queryset = models.haveFunUser.objects.all()
+   queryset = models.haveFunUser.objects.select_related().all()
    serializer_class = serializers.UserInforSerializer
    permission_classes = (permissions.AllowAny,)
 
@@ -167,9 +192,9 @@ class UserRegisterAPIView(APIView):
        phone = data.get('phone')
        print('registrt--->',data)
        dic = {}
-       if models.haveFunUser.objects.filter(name__exact=username):
+       if models.haveFunUser.objects.select_related().filter(name__exact=username):
            return JSONResponse({'desc':'用户名已存在'},status=HTTP_400_BAD_REQUEST)
-       if models.haveFunUser.objects.filter(phone__exact=phone):
+       if models.haveFunUser.objects.select_related().filter(phone__exact=phone):
            return JSONResponse({'desc':'手机号码已存在'},status=HTTP_400_BAD_REQUEST)
        serializer = serializers.UserSerializer(data=data)
        if serializer.is_valid(raise_exception=True):
@@ -182,7 +207,7 @@ class UserRegisterAPIView(APIView):
 
 
 class ArticalTagViewSet(viewsets.ModelViewSet):
-   queryset = models.ArticalTag.objects.all()
+   queryset = models.ArticalTag.objects.select_related().all()
    serializer_class = serializers.ArticalTagSerializer
    # permission_classes = (IsOwnerOrReadOnly)
    # def perform_create(self, serializer):
@@ -190,7 +215,7 @@ class ArticalTagViewSet(viewsets.ModelViewSet):
    #     serializer.save(owner=models.haveFunUser.objects.get(id=self.request.session.get('user_id')))
 
 class ArticalViewSet(viewsets.ModelViewSet):
-   queryset = models.Artical.objects.all()
+   queryset = models.Artical.objects.select_related().all()
    serializer_class = serializers.ArticalSerializer
    # permission_classes = (IsOwnerOrReadOnly)
 
@@ -199,7 +224,7 @@ class ArticalViewSet(viewsets.ModelViewSet):
    #     serializer.save(owner=models.haveFunUser.objects.get(id=self.request.session.get('user_id')))
 
 class UserViewSet(viewsets.ModelViewSet):
-   queryset = models.haveFunUser.objects.all()
+   queryset = models.haveFunUser.objects.select_related().all()
    serializer_class = serializers.UserInforSerializer
 
 #用于保存文章草稿
@@ -214,7 +239,7 @@ def artical_draft_save(request):
             return HttpResponse("请先登录")
         if not title:
             return HttpResponse("请先填写文章标题")
-        user = models.haveFunUser.objects.filter(user_id__exact=user_id)
+        user = models.haveFunUser.objects.select_related().filter(user_id__exact=user_id)
         if not user:
             return HttpResponse("请先登录")
         dic = {'title':title,'content':content,'tag_id':tag_id,'owner_id':user_id}
@@ -225,13 +250,13 @@ def artical_draft_save(request):
 
 #用于获取用户文集
 class UserArticalTagAPIView(APIView):
-   queryset = models.ArticalTag.objects.all()
+   queryset = models.ArticalTag.objects.select_related().all()
    serializer_class = serializers.ArticalTagSerializer
    permission_classes = (permissions.IsAuthenticated,)   
    def post(self, request, format=None):
        user_id = request.session['user_id'];
        if int(user_id)>0:
-           tag = models.ArticalTag.objects.filter(createdByUser_id__exact=user_id)
+           tag = models.ArticalTag.objects.select_related().filter(createdByUser_id__exact=user_id)
            data=serializers.ArticalTagSerializer(tag,many=True)
            dic = {'result':data.data,'desc':'获取成功'}
            return JSONResponse(dic, status=HTTP_200_OK)
@@ -242,7 +267,7 @@ class UserArticalTagAPIView(APIView):
 @csrf_exempt
 def Artical_list_api(request):
   if request.method == 'POST':
-    arr = models.Artical.objects.all().order_by('article_id') #order_by必须有 不然分页失败
+    arr = models.Artical.objects.select_related().all().order_by('article_id') #order_by必须有 不然分页失败
     return api_paging(arr, request, serializers.ArticalSerializer) #分页处理
     
 
@@ -250,13 +275,13 @@ def Artical_list_api(request):
 @csrf_exempt
 def Artical_Tag_List_api(request):
   if request.method == 'POST':
-    arr = models.ArticalTag.objects.all().order_by('tag_id')
+    arr = models.ArticalTag.objects.select_related().all().order_by('tag_id')
     data=serializers.ArticalTagSerializer(arr,many=True)
     dic = {'result':data.data,'desc':'获取成功'}
     return JSONResponse(dic, status=HTTP_200_OK)
 
 class UserChnageAPIView(APIView):
-   queryset = models.haveFunUser.objects.all()
+   queryset = models.haveFunUser.objects.select_related().all()
    serializer_class = serializers.UserInforSerializer
    permission_classes = (permissions.AllowAny,)
 # 修改用户信息
@@ -267,7 +292,7 @@ class UserChnageAPIView(APIView):
           sex =request.POST.get('sex')
           email = request.POST.get('email')
           address = request.POST.get('address')
-          user = models.haveFunUser.objects.filter(user_id__exact=user_id)
+          user = models.haveFunUser.objects.select_related().filter(user_id__exact=user_id)
           print('change_user_info======')
           if user:
               if sex:
@@ -287,26 +312,51 @@ class UserChnageAPIView(APIView):
 def Artical_upload_api(request):
   if request.method == 'POST':
       title =request.POST.get('title')
+      image =request.POST.get('imageName')
       content = request.POST.get('content')
-      user_id = request.POST.get('user_id')
-      tag_id = request.POST.get('tag_id')
+      user_id = int(request.POST.get('user_id'))
+      tag_id = int(request.POST.get('tag_id'))
       if not user_id:
           return JSONResponse( {'desc':'请先登录'},status=HTTP_400_BAD_REQUEST)
       if not title:
           return JSONResponse( {'desc':'请先填写文章标题'},status=HTTP_400_BAD_REQUEST)
       if not tag_id:
           return JSONResponse( {'desc':'请选择文集'},status=HTTP_400_BAD_REQUEST)
-      dic = {'title':title,'content':content,'tag_id':tag_id,'owner_id':user_id}
-      models.Artical.objects.create(**dic)
-      return JSONResponse({'desc':'保存成功'}, status=HTTP_200_OK)         
+      dic = {'title':title,'content':content,'tag_id':tag_id,'owner_id':user_id,'image':image}
+      try :
+          models.Artical.objects.create(**dic)
+          return JSONResponse({'result':'success','desc':'保存成功'}, status=HTTP_200_OK)
+      except:
+          return JSONResponse( {'desc':'保存失败'},status=HTTP_400_BAD_REQUEST)
+
 #APP获取用户文集
 @csrf_exempt
 def tag_list_api(request):
   if request.method == 'POST':  
        user_id = request.POST.get('user_id')
        if user_id:
-           tag = models.ArticalTag.objects.filter(createdByUser_id__exact=user_id)
+           tag = models.ArticalTag.objects.select_related().filter(createdByUser_id__exact=user_id)
            data=serializers.ArticalTagSerializer(tag,many=True)
            dic = {'result':data.data,'desc':'获取成功'}
            return JSONResponse(dic, status=HTTP_200_OK)
        return JSONResponse({'desc':'请先登录'}, status=HTTP_400_BAD_REQUEST)
+
+#APP用户上传文集
+@csrf_exempt
+def tag_create_api(request):
+  if request.method == 'POST':
+      tag_name =request.POST.get('tag_name')
+      tag_img =request.POST.get('tag_img')
+      tag_abstract = request.POST.get('tag_abstract')
+      createdByUser_id = int(request.POST.get('user_id'))
+      if not createdByUser_id:
+          return JSONResponse( {'desc':'请先登录'},status=HTTP_400_BAD_REQUEST)
+      if not tag_name:
+          return JSONResponse( {'desc':'请先填写文集标题'},status=HTTP_400_BAD_REQUEST)
+      dic = {'tag_name':tag_name,'tag_img':tag_img,'tag_abstract':tag_abstract,'createdByUser_id':createdByUser_id}
+      try :
+          print('upload---tag---',dic)
+          models.ArticalTag.objects.create(**dic)
+          return JSONResponse({'result':'success','desc':'保存成功'}, status=HTTP_200_OK)
+      except:
+          return JSONResponse( {'desc':'保存失败'},status=HTTP_400_BAD_REQUEST)

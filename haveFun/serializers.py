@@ -22,15 +22,16 @@ class ImageSerializer(serializers.ModelSerializer):
 class ArticalImageSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(max_length=None, use_url=True)#use_url=True是否显示完整的路径
     def create(self, validated_data):
+        print('upload--artical-photo--')
         data = self.context.get('request').data.dict()
-        article_id = data['article_id']       
-        print('article_id=------',article_id,'xasaaaaa=---',validated_data)
-        validated_data.update({'uploaded_artical_id': article_id})
+        user_id = data['uploaded_by']       
+        print('user_id=------',validated_data)
+        validated_data.update({'uploaded_by': user_id})
         validated_data.update({'filename': data['filename']})
         return models.articalHeadImage.objects.create(**validated_data)
     class Meta:
-        model = models.userHeadImage
-        fields = ('filename','image','uploaded_artical_id')
+        model = models.articalHeadImage
+        fields = ('filename','image','uploaded_by')
 
 
 #用户基本信息

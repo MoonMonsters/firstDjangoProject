@@ -16,6 +16,8 @@ urlpatterns = [
     url(r'^artical_upload$', views.Artical_upload_api),
     url(r'^upload_artical_image$', views.UploadArticalImageSet.as_view()),
     url(r'^artical_tags$', views.tag_list_api),#APP文集列表
+    url(r'^artical_tag_create$', views.tag_create_api),#APP文集创建
+    url(r'^upload_artical_tag_image$', views.UploadArticalTagImageSet.as_view()),#上传文集照片
 
     url(r'^articals$', views.Artical_list_api),#文章列表
     url(r'^articalTags$', views.Artical_Tag_List_api),#文集列表
